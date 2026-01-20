@@ -15,13 +15,13 @@ app.get('/health', (req, res) => res.send('OK'));
 // Overlay endpoint
 app.post('/overlay', async (req, res) => {
   const { videoUrl, text } = req.body;
-  if (!videoUrl || !text) return res.status(400).send('Chýba videoUrl alebo text');
+  if (!videoUrl || !text) return res.status(400).send('Missing videoUrl or text');
 
   const inputPath = '/tmp/input.mp4';
   const outputPath = '/tmp/output.mp4';
 
   try {
-    // Stiahni video
+    // Download video
     const response = await axios({ method: 'GET', url: videoUrl, responseType: 'stream' });
     const writer = fs.createWriteStream(inputPath);
     response.data.pipe(writer);
@@ -37,16 +37,16 @@ app.post('/overlay', async (req, res) => {
         .run();
     });
 
-    // Pošli späť ako video
+    // Return video
     res.set('Content-Type', 'video/mp4');
     fs.createReadStream(outputPath).pipe(res);
 
   } catch (err) {
-    res.status(500).send('Chyba: ' + err.message);
+    res.status(500).send('Error: ' + err.message);
   } finally {
     await fs.remove(inputPath);
     await fs.remove(outputPath);
   }
 });
 
-app.listen(PORT, () => console.log(`Server beží na porte ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
