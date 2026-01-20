@@ -1,19 +1,18 @@
 import express from "express";
-import { exec } from "child_process";
+import { execFile } from "child_process";
+import ffmpegPath from "ffmpeg-static";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 
-// TEST ENDPOINT
 app.get("/", (req, res) => {
   res.json({ status: "OK", message: "FFmpeg API running" });
 });
 
-// FFmpeg TEST
 app.get("/ffmpeg", (req, res) => {
-  exec("ffmpeg -version", (error, stdout, stderr) => {
-    if (error) {
-      return res.status(500).json({ error: error.message });
+  execFile(ffmpegPath, ["-version"], (err, stdout) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
     }
     res.json({ ffmpeg: stdout.split("\n")[0] });
   });
